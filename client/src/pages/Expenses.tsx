@@ -12,7 +12,8 @@ import { toast } from "sonner";
 
 export default function Expenses() {
   const [open, setOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const ALL_BRANCHES = "all";
+  const [selectedBranch, setSelectedBranch] = useState<string>(ALL_BRANCHES);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -22,7 +23,7 @@ export default function Expenses() {
 
   const { data: branches } = trpc.branches.list.useQuery();
   const { data: expenses, refetch: refetchExpenses } = trpc.expenses.list.useQuery({
-    branchId: selectedBranch ? parseInt(selectedBranch) : undefined,
+    branchId: selectedBranch === ALL_BRANCHES ? undefined : parseInt(selectedBranch),
   });
 
   const createMutation = trpc.expenses.create.useMutation({
@@ -130,7 +131,7 @@ export default function Expenses() {
               <SelectValue placeholder="Filter by branch" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Branches</SelectItem>
+              <SelectItem value={ALL_BRANCHES}>All Branches</SelectItem>
               {branches?.map((branch) => (
                 <SelectItem key={branch.id} value={branch.id.toString()}>
                   {branch.name}
@@ -237,7 +238,7 @@ export default function Expenses() {
         <CardHeader>
           <CardTitle>Expense List</CardTitle>
           <CardDescription>
-            {expenses?.length || 0} expenses {selectedBranch ? "in selected branch" : "across all branches"}
+            {expenses?.length || 0} expenses {selectedBranch !== ALL_BRANCHES ? "in selected branch" : "across all branches"}
           </CardDescription>
         </CardHeader>
         <CardContent>
