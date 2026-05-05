@@ -12,7 +12,8 @@ import { toast } from "sonner";
 
 export default function Products() {
   const [open, setOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const ALL_BRANCHES = "all";
+  const [selectedBranch, setSelectedBranch] = useState<string>(ALL_BRANCHES);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -24,7 +25,7 @@ export default function Products() {
 
   const { data: branches } = trpc.branches.list.useQuery();
   const { data: products, refetch: refetchProducts } = trpc.products.list.useQuery({
-    branchId: selectedBranch ? parseInt(selectedBranch) : undefined,
+    branchId: selectedBranch === ALL_BRANCHES ? undefined : parseInt(selectedBranch),
   });
 
   const createMutation = trpc.products.create.useMutation({
@@ -101,7 +102,7 @@ export default function Products() {
   };
 
   const branchMap = branches?.reduce((acc, b) => ({ ...acc, [b.id]: b.name }), {});
-  const filteredProducts = selectedBranch ? products : products;
+  const filteredProducts = products;
 
   return (
     <div className="space-y-6">
@@ -116,7 +117,7 @@ export default function Products() {
               <SelectValue placeholder="Filter by branch" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Branches</SelectItem>
+              <SelectItem value={ALL_BRANCHES}>All Branches</SelectItem>
               {branches?.map((branch) => (
                 <SelectItem key={branch.id} value={branch.id.toString()}>
                   {branch.name}
@@ -210,7 +211,7 @@ export default function Products() {
         <CardHeader>
           <CardTitle>Product Inventory</CardTitle>
           <CardDescription>
-            {filteredProducts?.length || 0} products {selectedBranch ? "in selected branch" : "across all branches"}
+            {filteredProducts?.length || 0} products {selectedBranch !== ALL_BRANCHES ? "in selected branch" : "across all branches"}
           </CardDescription>
         </CardHeader>
         <CardContent>

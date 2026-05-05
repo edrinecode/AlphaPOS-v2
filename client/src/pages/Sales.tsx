@@ -12,7 +12,8 @@ import { toast } from "sonner";
 
 export default function Sales() {
   const [open, setOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const ALL_BRANCHES = "all";
+  const [selectedBranch, setSelectedBranch] = useState<string>(ALL_BRANCHES);
   const [formData, setFormData] = useState({
     productId: "",
     quantity: "1",
@@ -20,10 +21,10 @@ export default function Sales() {
 
   const { data: branches } = trpc.branches.list.useQuery();
   const { data: products } = trpc.products.list.useQuery({
-    branchId: selectedBranch ? parseInt(selectedBranch) : undefined,
+    branchId: selectedBranch === ALL_BRANCHES ? undefined : parseInt(selectedBranch),
   });
   const { data: sales, refetch: refetchSales } = trpc.sales.list.useQuery({
-    branchId: selectedBranch ? parseInt(selectedBranch) : undefined,
+    branchId: selectedBranch === ALL_BRANCHES ? undefined : parseInt(selectedBranch),
   });
 
   const recordSaleMutation = trpc.sales.recordProductSale.useMutation({
@@ -67,7 +68,7 @@ export default function Sales() {
               <SelectValue placeholder="Filter by branch" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Branches</SelectItem>
+              <SelectItem value={ALL_BRANCHES}>All Branches</SelectItem>
               {branches?.map((branch) => (
                 <SelectItem key={branch.id} value={branch.id.toString()}>
                   {branch.name}
@@ -129,7 +130,7 @@ export default function Sales() {
         <CardHeader>
           <CardTitle>Sales History</CardTitle>
           <CardDescription>
-            {productSales.length} product sales {selectedBranch ? "in selected branch" : "across all branches"}
+            {productSales.length} product sales {selectedBranch !== ALL_BRANCHES ? "in selected branch" : "across all branches"}
           </CardDescription>
         </CardHeader>
         <CardContent>

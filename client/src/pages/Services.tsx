@@ -12,7 +12,8 @@ import { toast } from "sonner";
 
 export default function Services() {
   const [open, setOpen] = useState(false);
-  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const ALL_BRANCHES = "all";
+  const [selectedBranch, setSelectedBranch] = useState<string>(ALL_BRANCHES);
   const [formData, setFormData] = useState({
     itemName: "",
     branchId: "",
@@ -21,7 +22,7 @@ export default function Services() {
 
   const { data: branches } = trpc.branches.list.useQuery();
   const { data: sales, refetch: refetchSales } = trpc.sales.list.useQuery({
-    branchId: selectedBranch ? parseInt(selectedBranch) : undefined,
+    branchId: selectedBranch === ALL_BRANCHES ? undefined : parseInt(selectedBranch),
   });
 
   const recordServiceMutation = trpc.sales.recordServiceSale.useMutation({
@@ -64,7 +65,7 @@ export default function Services() {
               <SelectValue placeholder="Filter by branch" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Branches</SelectItem>
+              <SelectItem value={ALL_BRANCHES}>All Branches</SelectItem>
               {branches?.map((branch) => (
                 <SelectItem key={branch.id} value={branch.id.toString()}>
                   {branch.name}
@@ -135,7 +136,7 @@ export default function Services() {
         <CardHeader>
           <CardTitle>Service Sales History</CardTitle>
           <CardDescription>
-            {serviceSales.length} service sales {selectedBranch ? "in selected branch" : "across all branches"}
+            {serviceSales.length} service sales {selectedBranch !== ALL_BRANCHES ? "in selected branch" : "across all branches"}
           </CardDescription>
         </CardHeader>
         <CardContent>
