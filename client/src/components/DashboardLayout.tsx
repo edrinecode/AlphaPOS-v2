@@ -21,16 +21,30 @@ import {
 } from "@/components/ui/sidebar";
 import { getLoginUrl } from "@/const";
 import { useIsMobile } from "@/hooks/useMobile";
-import { LayoutDashboard, LogOut, PanelLeft, Users } from "lucide-react";
+import { LayoutDashboard, LogOut, PanelLeft, Users, ShoppingCart, TrendingUp, Briefcase, DollarSign, BarChart3, MapPin } from "lucide-react";
 import { CSSProperties, useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { DashboardLayoutSkeleton } from './DashboardLayoutSkeleton';
 import { Button } from "./ui/button";
 
-const menuItems = [
-  { icon: LayoutDashboard, label: "Page 1", path: "/" },
-  { icon: Users, label: "Page 2", path: "/some-path" },
-];
+const getMenuItems = (userRole?: string) => {
+  const baseItems = [
+    { icon: LayoutDashboard, label: "Dashboard", path: "/" },
+    { icon: ShoppingCart, label: "Products", path: "/products" },
+    { icon: TrendingUp, label: "Sales", path: "/sales" },
+    { icon: Briefcase, label: "Services", path: "/services" },
+    { icon: DollarSign, label: "Expenses", path: "/expenses" },
+    { icon: BarChart3, label: "Reports", path: "/reports" },
+    { icon: MapPin, label: "Branches", path: "/branches" },
+  ];
+  
+  // Only show Users for Shop Owner (admin)
+  if (userRole === "admin") {
+    baseItems.push({ icon: Users, label: "Users", path: "/users" });
+  }
+  
+  return baseItems;
+};
 
 const SIDEBAR_WIDTH_KEY = "sidebar-width";
 const DEFAULT_WIDTH = 280;
@@ -112,6 +126,7 @@ function DashboardLayoutContent({
   const isCollapsed = state === "collapsed";
   const [isResizing, setIsResizing] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
+  const menuItems = getMenuItems(user?.role);
   const activeMenuItem = menuItems.find(item => item.path === location);
   const isMobile = useIsMobile();
 
@@ -159,7 +174,7 @@ function DashboardLayoutContent({
           className="border-r-0"
           disableTransition={isResizing}
         >
-          <SidebarHeader className="h-16 justify-center">
+          <SidebarHeader className="h-16 justify-center border-b">
             <div className="flex items-center gap-3 px-2 transition-all w-full">
               <button
                 onClick={toggleSidebar}
@@ -170,8 +185,8 @@ function DashboardLayoutContent({
               </button>
               {!isCollapsed ? (
                 <div className="flex items-center gap-2 min-w-0">
-                  <span className="font-semibold tracking-tight truncate">
-                    Navigation
+                  <span className="font-semibold tracking-tight truncate text-primary">
+                    AlphaPOS Pro
                   </span>
                 </div>
               ) : null}
